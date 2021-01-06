@@ -68,9 +68,9 @@ class CameraViewController: UIViewController {
     }
     
     func setupAVSession() throws {
-        // Select a front facing camera, make an input.
-        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
-            throw AppError.captureSessionSetup(reason: "Could not find a front facing camera.")
+        // Select a rear camera, make an input.
+        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+            throw AppError.captureSessionSetup(reason: "Could not find a rear camera.")
         }
         
         guard let deviceInput = try? AVCaptureDeviceInput(device: videoDevice) else {
