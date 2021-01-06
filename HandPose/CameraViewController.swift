@@ -31,7 +31,7 @@ class CameraViewController: UIViewController {
         drawOverlay.frame = view.layer.bounds
         drawOverlay.lineWidth = 5
         drawOverlay.backgroundColor = #colorLiteral(red: 0.9999018312, green: 1, blue: 0.9998798966, alpha: 0.5).cgColor
-        drawOverlay.strokeColor = #colorLiteral(red: 0.6, green: 0.1, blue: 0.3, alpha: 1).cgColor
+        drawOverlay.strokeColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1).cgColor
         drawOverlay.fillColor = #colorLiteral(red: 0.9999018312, green: 1, blue: 0.9998798966, alpha: 0).cgColor
         drawOverlay.lineCap = .round
         view.layer.addSublayer(drawOverlay)
