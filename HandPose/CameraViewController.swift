@@ -28,6 +28,8 @@ class CameraViewController: UIViewController {
     
     private var IntTarsIndexTipx: Int?
     private var IntTarsIndexTipy: Int?
+    
+    private var strTarsIndexTipPoints: String = ""
             
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,9 +73,9 @@ class CameraViewController: UIViewController {
     }
     
     func setupAVSession() throws {
-        // Select a rear camera, make an input.
+        // Select a rear ultra wide camera, make an input.
         guard let videoDevice = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) else {
-            throw AppError.captureSessionSetup(reason: "Could not find a rear camera.")
+            throw AppError.captureSessionSetup(reason: "Could not find a rear ultra wide camera.")
         }
         
         guard let deviceInput = try? AVCaptureDeviceInput(device: videoDevice) else {
@@ -202,7 +204,8 @@ class CameraViewController: UIViewController {
         let strTarsIndexTipx:String = String(IntTarsIndexTipx!)
         let strTarsIndexTipy:String = String(IntTarsIndexTipy!)
         
-        print("x: " + strTarsIndexTipx + " y:", strTarsIndexTipy)
+        strTarsIndexTipPoints = "エックス" + strTarsIndexTipx + "ワイ" + strTarsIndexTipy
+        print(strTarsIndexTipPoints)
     }
 }
 
