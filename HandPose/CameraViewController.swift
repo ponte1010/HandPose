@@ -26,9 +26,9 @@ class CameraViewController: UIViewController {
     
     private var gestureProcessor = HandGestureProcessor()
     
-    private var tarsThumbTip: CGPoint?
-    private var tarsIndexTip: CGPoint?
-    
+    private var IntTarsIndexTipx: Int?
+    private var IntTarsIndexTipy: Int?
+            
     override func viewDidLoad() {
         super.viewDidLoad()
         drawOverlay.frame = view.layer.bounds
@@ -199,7 +199,10 @@ class CameraViewController: UIViewController {
         drawPath.removeAllPoints()
         drawOverlay.path = drawPath.cgPath
         
-        print(tarsIndexTip!)
+        let strTarsIndexTipx:String = String(IntTarsIndexTipx!)
+        let strTarsIndexTipy:String = String(IntTarsIndexTipy!)
+        
+        print("x: " + strTarsIndexTipx + " y:", strTarsIndexTipy)
     }
 }
 
@@ -239,8 +242,9 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             thumbTip = CGPoint(x: thumbTipPoint.location.x, y: 1 - thumbTipPoint.location.y)
             indexTip = CGPoint(x: indexTipPoint.location.x, y: 1 - indexTipPoint.location.y)
             // Convert points from AVFoundation coordinates to TARS coordinates.
-            tarsThumbTip = CGPoint(x: 1 - thumbTipPoint.location.x, y: 1 - thumbTipPoint.location.y)
-            tarsIndexTip = CGPoint(x: 1 - indexTipPoint.location.x, y: 1 - indexTipPoint.location.y)
+            IntTarsIndexTipx = Int(1170 * (1 - indexTipPoint.location.y))
+            IntTarsIndexTipy = Int(2532 * (1 - indexTipPoint.location.x))
+            
         } catch {
             cameraFeedSession?.stopRunning()
             let error = AppError.visionError(error: error)
