@@ -26,6 +26,9 @@ class CameraViewController: UIViewController {
     
     private var gestureProcessor = HandGestureProcessor()
     
+    private var thumbTip: CGPoint?
+    private var indexTip: CGPoint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         drawOverlay.frame = view.layer.bounds
@@ -195,13 +198,13 @@ class CameraViewController: UIViewController {
         evidenceBuffer.removeAll()
         drawPath.removeAllPoints()
         drawOverlay.path = drawPath.cgPath
+        
+        print(indexTip!)
     }
 }
 
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        var thumbTip: CGPoint?
-        var indexTip: CGPoint?
         
         defer {
             DispatchQueue.main.sync {
