@@ -30,6 +30,9 @@ class CameraViewController: UIViewController {
     private var IntTarsIndexTipy: Int?
     
     private var strTarsIndexTipPoints: String = ""
+    
+    // Create AVSpeechSynthesizer instances.
+    let synthesizer = AVSpeechSynthesizer()
             
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -206,6 +209,11 @@ class CameraViewController: UIViewController {
         
         strTarsIndexTipPoints = "エックス" + strTarsIndexTipx + "ワイ" + strTarsIndexTipy
         print(strTarsIndexTipPoints)
+        
+        let utterance = AVSpeechUtterance.init(string: strTarsIndexTipPoints)
+        let voice = AVSpeechSynthesisVoice.init(language: "ja-JP")
+        utterance.voice = voice
+        synthesizer.speak(utterance)
     }
 }
 
