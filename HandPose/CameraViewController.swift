@@ -17,15 +17,6 @@ class CameraViewController: UIViewController {
     private var cameraFeedSession: AVCaptureSession?
     private var handPoseRequest = VNDetectHumanHandPoseRequest()
     
-    private let drawOverlay = CAShapeLayer()
-    private let drawPath = UIBezierPath()
-    private var evidenceBuffer = [HandGestureProcessor.PointsPair]()
-    private var lastDrawPoint: CGPoint?
-    private var isFirstSegment = true
-    private var lastObservationTimestamp = Date()
-    
-    private var gestureProcessor = HandGestureProcessor()
-    
     private var IntTarsIndexTipx: Int?
     private var IntTarsIndexTipy: Int?
     
@@ -36,19 +27,8 @@ class CameraViewController: UIViewController {
             
     override func viewDidLoad() {
         super.viewDidLoad()
-        drawOverlay.frame = view.layer.bounds
-        drawOverlay.lineWidth = 5
-        drawOverlay.backgroundColor = #colorLiteral(red: 0.9999018312, green: 1, blue: 0.9998798966, alpha: 0.5).cgColor
-        drawOverlay.strokeColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1).cgColor
-        drawOverlay.fillColor = #colorLiteral(red: 0.9999018312, green: 1, blue: 0.9998798966, alpha: 0).cgColor
-        drawOverlay.lineCap = .round
-        view.layer.addSublayer(drawOverlay)
         // This sample app detects one hand only.
         handPoseRequest.maximumHandCount = 1
-        // Add state change handler to hand gesture processor.
-        gestureProcessor.didChangeStateClosure = { [weak self] state in
-            self?.handleGestureStateChange(state: state)
-        }
         // Add double tap gesture recognizer for clearing the draw path.
         let recognizer = UITapGestureRecognizer(target: self, action: #selector(handleGesture(_:)))
         recognizer.numberOfTouchesRequired = 1
@@ -111,98 +91,17 @@ class CameraViewController: UIViewController {
     
     func processPoints(thumbTip: CGPoint?, indexTip: CGPoint?) {
         // Check that we have both points.
-        guard let thumbPoint = thumbTip, let indexPoint = indexTip else {
-            // If there were no observations for more than 2 seconds reset gesture processor.
-            if Date().timeIntervalSince(lastObservationTimestamp) > 2 {
-                gestureProcessor.reset()
-            }
+        guard let _ = thumbTip, let _ = indexTip else {
             cameraView.showPoints([], color: .clear)
             return
         }
         
-        // Convert points from AVFoundation coordinates to UIKit coordinates.
-        let previewLayer = cameraView.previewLayer
-        let thumbPointConverted = previewLayer.layerPointConverted(fromCaptureDevicePoint: thumbPoint)
-        let indexPointConverted = previewLayer.layerPointConverted(fromCaptureDevicePoint: indexPoint)
-        
-        // Process new points
-        gestureProcessor.processPointsPair((thumbPointConverted, indexPointConverted))
-    }
-    
-    private func handleGestureStateChange(state: HandGestureProcessor.State) {
-        let pointsPair = gestureProcessor.lastProcessedPointsPair
-        var tipsColor: UIColor
-        switch state {
-        case .possiblePinch, .possibleApart:
-            // We are in one of the "possible": states, meaning there is not enough evidence yet to determine
-            // if we want to draw or not. For now, collect points in the evidence buffer, so we can add them
-            // to a drawing path when required.
-            evidenceBuffer.append(pointsPair)
-            tipsColor = .orange
-        case .pinched:
-            // We have enough evidence to draw. Draw the points collected in the evidence buffer, if any.
-            for bufferedPoints in evidenceBuffer {
-                updatePath(with: bufferedPoints, isLastPointsPair: false)
-            }
-            // Clear the evidence buffer.
-            evidenceBuffer.removeAll()
-            // Finally, draw the current point.
-            updatePath(with: pointsPair, isLastPointsPair: false)
-            tipsColor = .green
-        case .apart, .unknown:
-            // We have enough evidence to not draw. Discard any evidence buffer points.
-            evidenceBuffer.removeAll()
-            // And draw the last segment of our draw path.
-            updatePath(with: pointsPair, isLastPointsPair: true)
-            tipsColor = .red
-        }
-        cameraView.showPoints([pointsPair.thumbTip, pointsPair.indexTip], color: tipsColor)
-    }
-    
-    private func updatePath(with points: HandGestureProcessor.PointsPair, isLastPointsPair: Bool) {
-        // Get the mid point between the tips.
-        let (thumbTip, indexTip) = points
-        let drawPoint = CGPoint.midPoint(p1: thumbTip, p2: indexTip)
-
-        if isLastPointsPair {
-            if let lastPoint = lastDrawPoint {
-                // Add a straight line from the last midpoint to the end of the stroke.
-                drawPath.addLine(to: lastPoint)
-            }
-            // We are done drawing, so reset the last draw point.
-            lastDrawPoint = nil
-        } else {
-            if lastDrawPoint == nil {
-                // This is the beginning of the stroke.
-                drawPath.move(to: drawPoint)
-                isFirstSegment = true
-            } else {
-                let lastPoint = lastDrawPoint!
-                // Get the midpoint between the last draw point and the new point.
-                let midPoint = CGPoint.midPoint(p1: lastPoint, p2: drawPoint)
-                if isFirstSegment {
-                    // If it's the first segment of the stroke, draw a line to the midpoint.
-                    drawPath.addLine(to: midPoint)
-                    isFirstSegment = false
-                } else {
-                    // Otherwise, draw a curve to a midpoint using the last draw point as a control point.
-                    drawPath.addQuadCurve(to: midPoint, controlPoint: lastPoint)
-                }
-            }
-            // Remember the last draw point for the next update pass.
-            lastDrawPoint = drawPoint
-        }
-        // Update the path on the overlay layer.
-        drawOverlay.path = drawPath.cgPath
     }
     
     @IBAction func handleGesture(_ gesture: UITapGestureRecognizer) {
         guard gesture.state == .ended else {
             return
         }
-        evidenceBuffer.removeAll()
-        drawPath.removeAllPoints()
-        drawOverlay.path = drawPath.cgPath
         
         let strTarsIndexTipx:String = String(IntTarsIndexTipx!)
         let strTarsIndexTipy:String = String(IntTarsIndexTipy!)
